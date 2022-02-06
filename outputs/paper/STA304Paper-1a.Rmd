@@ -25,7 +25,7 @@ library(tidyverse)
   The dataset of crime victim contains 12 variables with 854 observation from 2014 to 2020. The 12 variables were ID, Index, reported year, category, subtype, assault subtype, gender, age group, age cohort, count, object ID, and geometry. ID and Index were the unique identifier for Open Data database. Reported year was the year the crime victims were reported. Category and subtype were the type of crime including assault, robbery, and sexual assault. Assault subtype was broken into a more specific categorization of crime. Gender, age group and age cohort were the sex and age identification of the victims. Count was the count of identified victims, although duplicate persons are possible if the same person was victimized for the same offense during the same period.\
   I used R to clean the data set with tidyverse[@R1] and Knitr[@R2]. Because of the strong correlation between some of the variables I deleted the columns in the data that would not have contribution to my analysis. Then I mutated the variable and categorized the crime count into five categories named “A” to “E”. Due to the unreliability of the Unknown data, I filtered all the observations with unknown gender or unknown age group and named the final cleaned dataset as data4.\
   According to the ASR crime category, all crime was divided into 4 categories. As the dataset of crime victims only gives the information of each observation respectively. It is necessary to investigate the relationship between the number of victims in every category according to the reported years. Figure 1 shows the distribution of crime category in every year from 2014 to 2020.\
-```{r}
+```{r echo=FALSE}
 library(opendatatoronto)
 library(dplyr)
 
@@ -43,7 +43,7 @@ datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'
 data <- filter(datastore_resources, row_number()==1) %>% get_resource()
 data
 ```
-```{r}
+```{r echo=FALSE}
 data1 <-
   data |>
   select(-geometry)
@@ -51,13 +51,13 @@ data2 <-
   data1 |>
   select(-ObjectId)
 ```
-```{r}
+```{r echo=FALSE}
 data4<-
   data2|>
   filter(AgeGroup != "Unknown")
 ```
 
-```{r}
+```{r echo=FALSE}
 data5 <-
   data4 |>
   mutate(Count_=
@@ -77,25 +77,25 @@ data5 <-
 
 ```{r hist2,fig.cap="An amazing plot", fig.width=6, fig.height=3,massage=FALSE, echo=FALSE}
 data5 %>% filter(!is.na(Count_)) %>% 
-  ggplot(aes(x= ReportedYear, fill = Subtype)) + geom_bar() + theme_classic()+
-  geom_text(stat = 'count',aes(label =..count.., vjust =-6))+
+  ggplot(aes(x= ReportedYear, fill = Subtype)) + geom_bar(position = "dodge") + theme_classic()+
+  geom_text(stat = 'count',aes(label =..count..),position = position_dodge(0.9))+
   labs(x = "Year", y = "Crime Category", title = "Figure 1: Year and Crime Relationship")
 ```
   Through figure 1 we could tell the total number of crime victims were gradually increasing from 2014 to 2020 except 2016. However, the year in this dataset only represent the year when the crime victims was reported and it also collected the victims who might be conducted crime outside of Toronto. Therefore, the data did not actually give reliable information about the relationship between the number of crime victims and year. But the graph still showed the upward trend of crime in the last six years, especially the assault crime. As the substantial decrease of crime after the 2005 "year of the gun” and a long stable period between 2009-2014(Statistics Canada, 2021)[@P6], the assault crime rise from 12.5% in 2014 to 15.6% in 2020. Comparing to assault events, the other category of crime seems to be at a stable rate. It is worth noting that the robbery crime In 2016 was abnormally higher than 2015 and 2014. As robbery crime were not as serious as assault or sexual violation relatively, most of the people would report crime by themselves. 2016 happened to be the first year when some of the local victims of crime services station put into use, which could be one of the reason the robbery data was higher than the other years. In the other hand, this abnormal data could also be the proof of the underestimation of the dataset, some victims might not be bothered to report themselves as victims when the crime was not serious.\
-```{r, fig.width=6, fig.height=3}
+```{r, fig.width=6, fig.height=3, echo=FALSE}
 data5 %>% filter(!is.na(Count_)) %>% 
-  ggplot(aes(x= Subtype, fill = AgeGroup)) + geom_bar() + theme_classic()+
-  geom_text(stat = 'count',aes(label =..count.., vjust =0))+
-  labs(x = "Crime Category", y = "Age Group", title = "Figure 2: Age Group and Crime Category")
+  ggplot(aes(x= Subtype, fill = AgeGroup)) + geom_bar(position = "dodge") + theme_classic()+
+  geom_text(stat = 'count',aes(label =..count..),position = position_dodge(0.9))+
+  labs(x = "Subtype", y = "Count", title = "Figure 2: Age Group and Crime Category")
 ```
   The next graph shows the age group distribution of the victims in crime and we can see that over 80% of the victims are adults. Assault crime was defined as when someone either intends to, commits, or threatens to inflict serious bodily harm on another person. The motivation for this kind of crime was always social disorganization(Du Toit, 2017)[@P8]. Far away from the society and well-protected by the parents, the child and teenager were less likely to become the target of aggravated assault, thus the child and teenager victims only took 9.8% of total victims.\
   However, in robbery the criminals were always rational and tried to conduct the crime to fulfill their own monetary desire. Thus, teenagers and child with relatively lower chance to resist become the best target of crime and the number of these young victims took 24.8% of the total victims in robbery.\
 	Sexual violation is defined as the act in which one intentionally sexually touches another person without that person’s consent. In this specific kind of crime, the criminal was often psychologically distorted and did not have clear recognition of the consequences of their criminal behavior. At the same time due to the existence of pedophilia, the child and teenager victims in sexual violation reached 26.7%. Yet this result might still be underestimated. Firstly, some of the child victims are too young to understand the definition of sexual violation(Katz, 2021)[@P3]. They would not report the crime to their parents who could be the only way of data collection for them. Secondly, children could be were threatened or bribed by the abusers so that they are too afraid to report the abuse to parents. The sexual violation might even cause mental health problems and as a result hide the fact that they are actually victims of sexual crime. Last but not least, parents or custodian of child victims might ignore their word and considering it as stories made up by children. They might also refuse to report this to official website or police department out of guilty, embarrassment, and fear.
-```{r}
+```{r echo=FALSE}
 data4 %>% ggplot(aes(x = AgeCohort, y=Count_ ,color = Subtype)) + geom_point() + theme_classic()+
   labs(x = "Age Cohort", y = "Count", title = "Figure 3: Age Cohort in Different Crimes")
 ```
-```{r}
+```{r echo=FALSE}
 summary_table <- data4 %>% filter(!is.na(Count_)) %>% 
   group_by(AgeCohort) %>% summarise(min = min(Count_),
                                   Q1 = quantile(Count_,0.25),
