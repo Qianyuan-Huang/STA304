@@ -6,6 +6,7 @@ abstract: "The data of victims of crime are important resource in analyzing the 
 output: pdf_document
 bibliography: reference.bib
 ---
+Website for git hub^[https://github.com/Qianyuan-Huang/STA304]
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
